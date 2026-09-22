@@ -55,6 +55,18 @@ This exercises the same handler that a physical tag scan uses.
 - Spotify access: shared household Premium account via refresh token
 - No status LEDs or audio feedback in v1; errors are logged and viewed via SSH
 
+## GitHub Pages
+
+A simple landing page for the project is included in `docs/index.html` and is ready to be used with GitHub Pages.
+
+To enable it in GitHub:
+
+1. Open the repository on GitHub.
+2. Go to Settings → Pages.
+3. Source: Deploy from a branch.
+4. Branch: `master` and folder: `/docs`.
+5. Save.
+
 ## Future fast-follows
 
 - Bluetooth speaker support

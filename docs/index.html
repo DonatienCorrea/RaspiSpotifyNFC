@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RaspiSpotifyNFC</title>
+    <meta name="description" content="NFC-triggered Spotify playback on a Raspberry Pi 5." />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="container">
+        <p class="eyebrow">Raspberry Pi + NFC + Spotify</p>
+        <h1>RaspiSpotifyNFC</h1>
+        <p class="subtitle">
+          Tap a tag to play a playlist, resume a track, or trigger a simple control action.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/DonatienCorrea/RaspiSpotifyNFC" target="_blank" rel="noreferrer">GitHub repo</a>
+          <a class="button secondary" href="#setup">Setup guide</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="panel">
+        <h2>What this project does</h2>
+        <ul>
+          <li>Reads NFC tags with an RC522 reader connected to a Raspberry Pi.</li>
+          <li>Maps each tag to a Spotify URI or an action such as play/pause or next track.</li>
+          <li>Lets you assign tag values from a small local web interface.</li>
+          <li>Stores the tag mapping and resume state in SQLite.</li>
+          <li>Works in a fake mode for testing without hardware or a live Spotify token.</li>
+        </ul>
+      </section>
+
+      <section class="grid two-col">
+        <div class="panel">
+          <h2>Hardware</h2>
+          <ul>
+            <li>Raspberry Pi 5</li>
+            <li>RC522 NFC reader</li>
+            <li>SPI wiring to the Pi</li>
+            <li>Powered speaker via 3.5mm audio out</li>
+            <li>Spotify Connect-ready playback on the Pi</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Tag behavior</h2>
+          <ul>
+            <li>Content tag: <code>spotify:playlist:...</code></li>
+            <li>Content tag: <code>spotify:album:...</code></li>
+            <li>Content tag: <code>spotify:track:...</code></li>
+            <li>Control tag: <code>action:play_pause</code></li>
+            <li>Control tag: <code>action:next</code></li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="setup" class="panel">
+        <h2>Installation on a new Raspberry Pi</h2>
+
+        <ol class="steps">
+          <li>
+            <h3>1. Install Raspberry Pi OS Lite</h3>
+            <p>Use Raspberry Pi Imager to install Raspberry Pi OS Lite on the SD card.</p>
+            <p>Enable SSH, Wi‑Fi, and set a hostname if needed.</p>
+          </li>
+
+          <li>
+            <h3>2. Update the system</h3>
+            <pre>sudo apt update && sudo apt upgrade -y</pre>
+          </li>
+
+          <li>
+            <h3>3. Install Python tooling</h3>
+            <pre>sudo apt install -y python3 python3-pip python3-venv git</pre>
+          </li>
+
+          <li>
+            <h3>4. Clone the project</h3>
+            <pre>git clone https://github.com/DonatienCorrea/RaspiSpotifyNFC.git
+cd RaspiSpotifyNFC</pre>
+          </li>
+
+          <li>
+            <h3>5. Create a virtual environment</h3>
+            <pre>python3 -m venv .venv
+source .venv/bin/activate</pre>
+          </li>
+
+          <li>
+            <h3>6. Install dependencies</h3>
+            <pre>pip install -r requirements.txt
+pip install -r requirements-pi.txt</pre>
+          </li>
+
+          <li>
+            <h3>7. Copy the env file</h3>
+            <pre>cp .env.example .env</pre>
+          </li>
+
+          <li>
+            <h3>8. Add your Spotify configuration</h3>
+            <p>Edit <code>.env</code> and set:</p>
+            <pre>SPOTIFY_CLIENT_ID=your-client-id
+SPOTIFY_CLIENT_SECRET=your-client-secret
+SPOTIFY_REDIRECT_URI=http://localhost:8888/callback
+SPOTIFY_REFRESH_TOKEN=your-refresh-token</pre>
+            <p>Use a shared household Premium Spotify account for the Pi's playback account.</p>
+          </li>
+
+          <li>
+            <h3>9. Initialize the database</h3>
+            <pre>python -m app.main</pre>
+            <p>The app will create the SQLite database automatically on first run.</p>
+          </li>
+
+          <li>
+            <h3>10. Start the app</h3>
+            <pre>python -m app.main</pre>
+            <p>Open the app in the browser on the Pi or LAN IP:</p>
+            <pre>http://raspberrypi.local:5000</pre>
+          </li>
+        </ol>
+      </section>
+
+      <section class="panel">
+        <h2>Write and assign tags</h2>
+        <p>Open the web UI, paste the tag UID, and assign a Spotify URI or action value.</p>
+        <p>Examples:</p>
+        <pre>spotify:playlist:37i9dQZF1DXcBWIGoYBM5M
+spotify:album:4aawyAB9vmqN3uQ7FjRGTy
+action:play_pause
+action:next</pre>
+      </section>
+
+      <section class="panel">
+        <h2>Testing without hardware</h2>
+        <pre>python -m app.simulate --uid 01AABBCC --payload "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M"
+python -m app.simulate --uid 02AABBCC --payload "action:play_pause"</pre>
+        <p>This exercises the same dispatch path as a physical NFC tag.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Run tests</h2>
+        <pre>python3 -m unittest discover -s tests -v</pre>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>RaspiSpotifyNFC — NFC-triggered Spotify playback for a Raspberry Pi.</p>
+      </div>
+    </footer>
+  </body>
+</html>
