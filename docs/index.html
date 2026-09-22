@@ -25,10 +25,11 @@
           <span>Tap<span>Tune</span></span>
         </a>
         <nav class="site-nav" aria-label="Primary navigation">
+          <a href="#why">Why</a>
           <a href="#how-it-works">How it works</a>
           <a href="#architecture">Architecture</a>
           <a href="#install">Install</a>
-          <a class="nav-cta" href="https://github.com/DonatienCorrea/RaspiSpotifyNFC" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a>
+          <a class="nav-cta" href="https://github.com/DonatienCorrea/TapTune" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a>
         </nav>
       </div>
     </header>
@@ -66,17 +67,18 @@
         </div>
       </section>
 
-      <section class="manifesto">
+      <section class="manifesto" id="why">
         <div class="shell manifesto-grid">
-          <p class="section-index">The idea</p>
+          <p class="section-index">Why it exists</p>
           <div>
-            <h2>Your favorite music,<br /><span>without the screen.</span></h2>
-            <p class="body-copy">Give a playlist its own object. Give play/pause a physical gesture. The Pi sits quietly in the corner, listening for tags and handing the intent to Spotify.</p>
+            <h2>Music should be<br /><span>physical, friendly, and easy to reach.</span></h2>
+            <p class="body-copy">The main goal is to reduce our dependence on screens and use physical objects to play music. Instead of opening a phone or navigating a menu, a person can tap a simple object and the music starts. This makes the interaction more natural, more immediate, and more accessible in a real room.</p>
+            <p class="body-copy">The intention is not only to build a clever gadget. It is to create a way for people who are often kept away from screens — children, older adults, guests, or anyone who prefers tangible interfaces — to use music technology without friction. A tag becomes a familiar object, not a digital barrier: it invites interaction, lowers anxiety, and makes music part of the space around us.</p>
           </div>
           <div class="fact-stamp">
             <span class="stamp-icon" aria-hidden="true">✳</span>
-            <strong>Built for<br />real rooms</strong>
-            <small>not just demos</small>
+            <strong>Built for<br />real living</strong>
+            <small>not just screens</small>
           </div>
         </div>
       </section>
@@ -139,13 +141,13 @@
           <p class="section-index">The field guide</p>
           <h2>From blank SD card<br />to first <em>tap.</em></h2>
           <p>Follow the path in order. The default setup keeps hardware and playback concerns separate, so you can test on a laptop before moving to the Pi.</p>
-          <a class="button button-dark" href="https://github.com/DonatienCorrea/RaspiSpotifyNFC" target="_blank" rel="noreferrer">Open repository <span aria-hidden="true">↗</span></a>
+          <a class="button button-dark" href="https://github.com/DonatienCorrea/TapTune" target="_blank" rel="noreferrer">Open repository <span aria-hidden="true">↗</span></a>
         </div>
         <div class="install-steps">
           <div class="install-step"><span>01</span><div><h3>Prepare Raspberry Pi OS</h3><p>Install Raspberry Pi OS Lite, enable SSH and Wi‑Fi, then update the system.</p><pre>sudo apt update && sudo apt upgrade -y</pre></div></div>
           <div class="install-step"><span>02</span><div><h3>Clone &amp; isolate</h3><p>Install Python tooling, clone the project, and create a virtual environment.</p><pre>sudo apt install -y python3 python3-pip python3-venv git
-git clone https://github.com/DonatienCorrea/RaspiSpotifyNFC.git
-cd RaspiSpotifyNFC
+git clone https://github.com/DonatienCorrea/TapTune.git
+cd TapTune
 python3 -m venv .venv &amp;&amp; source .venv/bin/activate</pre></div></div>
           <div class="install-step"><span>03</span><div><h3>Install the two layers</h3><p>Base dependencies power local development; the Pi file adds RC522 support.</p><pre>pip install -r requirements.txt
 pip install -r requirements-pi.txt</pre></div></div>
@@ -176,7 +178,7 @@ pip install -r requirements-pi.txt</pre></div></div>
       <div class="shell footer-inner">
         <p><span class="wordmark-mark" aria-hidden="true">◉</span> TapTune</p>
         <p>Open hardware thinking for everyday listening.</p>
-        <a href="https://github.com/DonatienCorrea/RaspiSpotifyNFC" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/DonatienCorrea/TapTune" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
       </div>
     </footer>
   </body>

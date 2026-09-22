@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
 
 :root {
   --paper: #f4f1e8;
@@ -42,7 +42,7 @@ a:focus-visible, button:focus-visible {
 
 .site-header { border-bottom: 1px solid var(--line); }
 .header-inner { min-height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
-.wordmark { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font: 600 16px "Syne", sans-serif; letter-spacing: -0.035em; white-space: nowrap; }
+.wordmark { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font: 600 16px "Space Grotesk", sans-serif; letter-spacing: -0.035em; white-space: nowrap; }
 .wordmark > span:last-child span { color: var(--blue); }
 .wordmark-mark { color: var(--orange); font-size: 24px; line-height: 0; }
 .site-nav { display: flex; align-items: center; gap: 28px; font-size: 13px; color: var(--muted); }
@@ -54,7 +54,7 @@ a:focus-visible, button:focus-visible {
 .hero { min-height: 650px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 48px; padding-top: 72px; padding-bottom: 76px; }
 .kicker, .section-index { margin: 0 0 22px; font: 500 11px "DM Mono", monospace; letter-spacing: .13em; text-transform: uppercase; color: var(--blue); }
 h1, h2, h3, p { margin-top: 0; }
-h1, h2 { font-family: "Syne", sans-serif; letter-spacing: -.065em; }
+h1, h2 { font-family: "Space Grotesk", sans-serif; letter-spacing: -.065em; }
 h1 { max-width: 680px; margin-bottom: 28px; font-size: clamp(58px, 7vw, 104px); font-weight: 600; line-height: .9; }
 h1 em, h2 em { color: var(--orange); font-style: normal; }
 .hero-lede { max-width: 490px; margin-bottom: 32px; font-size: 18px; line-height: 1.55; color: var(--muted); }
@@ -98,8 +98,9 @@ h1 em, h2 em { color: var(--orange); font-style: normal; }
 .manifesto { padding: 104px 0; background: var(--blue); color: var(--white); }
 .manifesto-grid { display: grid; grid-template-columns: .55fr 1.5fr .6fr; gap: 48px; align-items: center; }
 .manifesto .section-index { color: #aebeff; }.manifesto h2 { margin-bottom: 24px; font-size: clamp(42px, 5vw, 72px); line-height: .98; }.manifesto h2 span { color: #aebeff; }
-.body-copy { max-width: 470px; margin: 0; color: #dce3ff; font-size: 16px; }
-.fact-stamp { border: 1px solid rgba(255,255,255,.4); padding: 22px; transform: rotate(3deg); }.stamp-icon { display: block; color: var(--orange); font-size: 24px; margin-bottom: 17px; }.fact-stamp strong { display: block; font: 600 20px/1.05 "Space Grotesk", sans-serif; }.fact-stamp small { display: block; margin-top: 22px; color: #aebeff; font: 10px "DM Mono", monospace; text-transform: uppercase; }
+.body-copy { max-width: 470px; margin: 0; color: #dce3ff; font-size: 16px; line-height: 1.75; }
+.body-copy + .body-copy { margin-top: 18px; }
+.fact-stamp { border: 1px solid rgba(255,255,255,.4); padding: 22px; transform: rotate(3deg); box-shadow: 10px 12px 0 rgba(17, 24, 29, 0.12); }.stamp-icon { display: block; color: var(--orange); font-size: 24px; margin-bottom: 17px; }.fact-stamp strong { display: block; font: 600 20px/1.05 "Space Grotesk", sans-serif; }.fact-stamp small { display: block; margin-top: 22px; color: #aebeff; font: 10px "DM Mono", monospace; text-transform: uppercase; }
 
 .section { padding-top: 126px; padding-bottom: 126px; }
 .section-heading h2 { margin-bottom: 20px; font-size: clamp(44px, 5vw, 70px); line-height: .95; }.section-heading > p:last-child { max-width: 310px; color: var(--muted); }

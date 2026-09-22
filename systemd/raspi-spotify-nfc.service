@@ -4,11 +4,11 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/pi/RaspiSpotifyNFC
+WorkingDirectory=/home/pi/TapTune
 ExecStart=/usr/bin/python3 -m app.main
 Restart=always
 RestartSec=5
-EnvironmentFile=/home/pi/RaspiSpotifyNFC/.env
+EnvironmentFile=/home/pi/TapTune/.env
 
 [Install]
 WantedBy=multi-user.target
