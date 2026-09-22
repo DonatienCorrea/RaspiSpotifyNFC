@@ -2,8 +2,12 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from spotipy import Spotify
-from spotipy.oauth2 import SpotifyOAuth
+try:
+    from spotipy import Spotify
+    from spotipy.oauth2 import SpotifyOAuth
+except ModuleNotFoundError:  # pragma: no cover - exercised when the optional dependency is absent.
+    Spotify = None
+    SpotifyOAuth = None
 
 from .config import settings
 
@@ -54,6 +58,12 @@ def is_live_spotify_configured() -> bool:
 def build_spotify_client() -> Any:
     if not is_live_spotify_configured():
         return FakeSpotifyClient()
+
+    if Spotify is None or SpotifyOAuth is None:
+        raise RuntimeError(
+            "Spotify support requires the 'spotipy' dependency. "
+            "Install it with 'pip install -r requirements.txt' or 'pip install -r requirements-pi.txt'."
+        )
 
     auth_manager = SpotifyOAuth(
         client_id=settings.SPOTIFY_CLIENT_ID,
