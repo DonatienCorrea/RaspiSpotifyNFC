@@ -31,8 +31,9 @@ A Raspberry Pi 5 + RC522 NFC reader project that lets a household tap physical t
    `pip install -r requirements-pi.txt`
 5. Copy the example environment file:
    `cp .env.example .env`
-6. Fill in your Spotify credentials and refresh token.
-7. Initialize the SQLite database and start the app:
+6. Fill in your Spotify credentials and refresh token when you want live playback.
+7. If no Spotify credentials are present, the app runs in a safe fake mode so the full tag flow can still be tested locally.
+8. Initialize the SQLite database and start the app:
    `python -m app.main`
 
 ## Simulated NFC test flow

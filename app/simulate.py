@@ -1,27 +1,20 @@
 import argparse
 
 from .db import record_event, upsert_tag
-from .spotify_service import next_track, play_content, toggle_playback
+from .spotify_service import dispatch_tag_value
 
 
 def dispatch_simulated_value(uid: str, value: str) -> dict:
     if value.startswith("spotify:"):
         tag_type = "content"
-        upsert_tag(uid=uid, value=value, tag_type=tag_type, label=f"simulated-{uid}")
-        record_event(uid, tag_type, value, source="simulate")
-        return play_content(value)
+    elif value.startswith("action:"):
+        tag_type = "action"
+    else:
+        raise ValueError(f"Unsupported simulated tag value: {value}")
 
-    if value == "action:play_pause":
-        upsert_tag(uid=uid, value=value, tag_type="action", label=f"simulated-{uid}")
-        record_event(uid, "action", value, source="simulate")
-        return toggle_playback()
-
-    if value == "action:next":
-        upsert_tag(uid=uid, value=value, tag_type="action", label=f"simulated-{uid}")
-        record_event(uid, "action", value, source="simulate")
-        return next_track()
-
-    raise ValueError(f"Unsupported simulated tag value: {value}")
+    upsert_tag(uid=uid, value=value, tag_type=tag_type, label=f"simulated-{uid}")
+    record_event(uid, tag_type, value, source="simulate")
+    return dispatch_tag_value(value)
 
 
 def main() -> None:

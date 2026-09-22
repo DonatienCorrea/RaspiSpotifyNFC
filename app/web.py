@@ -2,7 +2,7 @@ from flask import Flask, jsonify, render_template_string, request
 
 from .config import settings
 from .db import get_tag_by_uid, list_tags, record_event, upsert_tag
-from .spotify_service import next_track, toggle_playback, play_content
+from .spotify_service import dispatch_tag_value
 
 HTML = """
 <!doctype html>
@@ -78,16 +78,7 @@ def create_app() -> Flask:
             value = tag["value"]
 
         record_event(uid or "simulated", "content" if value.startswith("spotify:") else "action", value, source="web")
-
-        if value.startswith("spotify:"):
-            result = play_content(value)
-        elif value == "action:play_pause":
-            result = toggle_playback()
-        elif value == "action:next":
-            result = next_track()
-        else:
-            result = {"status": "unsupported_action", "value": value}
-
+        result = dispatch_tag_value(value)
         return jsonify({"status": "ok", "result": result})
 
     return app

@@ -1,4 +1,6 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import Any, Optional
 
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
@@ -6,9 +8,52 @@ from spotipy.oauth2 import SpotifyOAuth
 from .config import settings
 
 
-def build_spotify_client() -> Spotify:
-    if not settings.SPOTIFY_CLIENT_ID or not settings.SPOTIFY_CLIENT_SECRET:
-        raise RuntimeError("Missing Spotify credentials in .env")
+class FakeSpotifyClient:
+    def __init__(self):
+        self.is_playing = False
+        self.current_uri = "spotify:track:demo"
+        self.position_ms = 0
+
+    def start_playback(self, uris=None, context_uri=None, position_ms=0):
+        if uris:
+            self.current_uri = uris[0]
+        elif context_uri:
+            self.current_uri = context_uri
+        else:
+            self.current_uri = "spotify:track:demo"
+        self.position_ms = position_ms
+        self.is_playing = True
+        return {
+            "status": "ok",
+            "mode": "fake",
+            "uri": self.current_uri,
+            "position_ms": self.position_ms,
+        }
+
+    def pause_playback(self):
+        self.is_playing = False
+        return {"status": "ok", "mode": "fake", "paused": True}
+
+    def next_track(self):
+        self.is_playing = True
+        return {"status": "ok", "mode": "fake", "action": "next"}
+
+    def current_playback(self):
+        return {
+            "is_playing": self.is_playing,
+            "item": {"uri": self.current_uri},
+            "position_ms": self.position_ms,
+            "mode": "fake",
+        }
+
+
+def is_live_spotify_configured() -> bool:
+    return bool(settings.SPOTIFY_CLIENT_ID and settings.SPOTIFY_CLIENT_SECRET and settings.SPOTIFY_REFRESH_TOKEN)
+
+
+def build_spotify_client() -> Any:
+    if not is_live_spotify_configured():
+        return FakeSpotifyClient()
 
     auth_manager = SpotifyOAuth(
         client_id=settings.SPOTIFY_CLIENT_ID,
@@ -46,3 +91,13 @@ def next_track() -> dict:
 def get_current_playback() -> Optional[dict]:
     spotify = build_spotify_client()
     return spotify.current_playback()
+
+
+def dispatch_tag_value(value: str) -> dict:
+    if value.startswith("spotify:"):
+        return play_content(value)
+    if value == "action:play_pause":
+        return toggle_playback()
+    if value == "action:next":
+        return next_track()
+    return {"status": "unsupported_action", "value": value}
