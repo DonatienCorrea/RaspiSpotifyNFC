@@ -11,21 +11,21 @@ HTML = """
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TapTune</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f5f7ff;
-      --panel: rgba(255,255,255,0.9);
-      --panel-border: rgba(148,163,184,0.25);
-      --text: #1e293b;
-      --muted: #64748b;
-      --primary: #6d5efc;
-      --primary-dark: #5647e5;
-      --accent: #14b8a6;
-      --action: #f59e0b;
-      --success-bg: #ecfdf5;
-      --success-border: #a7f3d0;
-      --success-text: #065f46;
-      --shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+      --paper: #f4f1e8;
+      --paper-deep: #e8e3d5;
+      --ink: #182027;
+      --muted: #5c635f;
+      --line: #c9c5b9;
+      --blue: #1945e8;
+      --blue-dark: #1232aa;
+      --orange: #f06328;
+      --green: #20734f;
+      --white: #fbfaf5;
     }
 
     * { box-sizing: border-box; }
@@ -33,19 +33,19 @@ HTML = """
     body {
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 18px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #eef2ff 0%, var(--bg) 35%, #edf6ff 100%);
-      color: var(--text);
+      padding: 0 0 88px;
+      font-family: "DM Sans", sans-serif;
+      line-height: 1.55;
+      background: var(--paper);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
     }
 
     .app-shell {
-      width: min(980px, 100%);
+      width: min(1160px, calc(100% - 64px));
+      margin: 0 auto;
       display: grid;
-      gap: 22px;
+      gap: 0;
     }
 
     .header {
@@ -53,52 +53,58 @@ HTML = """
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      padding: 4px 6px;
+      min-height: 82px;
+      padding: 0;
+      border-bottom: 1px solid var(--line);
     }
 
     .title {
-      font-size: clamp(2.2rem, 3vw, 3rem);
-      line-height: 1.05;
-      font-weight: 800;
-      letter-spacing: -0.06em;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2.8rem, 7vw, 6.5rem);
+      line-height: .9;
+      font-weight: 600;
+      letter-spacing: -0.065em;
       margin: 0;
     }
 
     .subtitle {
-      margin: 6px 0 0;
+      margin: 18px 0 0;
       color: var(--muted);
-      font-size: 1rem;
+      font-size: 1.1rem;
+      max-width: 500px;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 0.55rem 0.9rem;
-      border-radius: 999px;
-      background: rgba(109, 94, 252, 0.12);
-      color: var(--primary-dark);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      font-size: 0.8rem;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--blue);
+      font: 500 11px "DM Mono", monospace;
+      letter-spacing: .13em;
+      text-transform: uppercase;
     }
 
     .panel {
-      background: var(--panel);
-      border: 1px solid var(--panel-border);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(8px);
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
     }
 
     .form-panel {
-      padding: clamp(1.2rem, 3vw, 2rem);
+      padding: 92px 0 110px;
+      border-bottom: 1px solid var(--line);
     }
 
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
+      gap: 18px 28px;
+      max-width: 780px;
     }
 
     .field {
@@ -107,74 +113,80 @@ HTML = """
       gap: 8px;
     }
 
+    .field:last-child {
+      grid-column: 1 / -1;
+    }
+
     .field label {
       font-size: 0.88rem;
       font-weight: 700;
       color: var(--muted);
+      font: 500 11px "DM Mono", monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
     }
 
     input {
       width: 100%;
-      padding: 0.9rem 1rem;
-      border-radius: 14px;
-      border: 1px solid rgba(148,163,184,0.6);
-      background: rgba(255,255,255,0.9);
-      color: var(--text);
-      font-size: 1rem;
+      padding: 0.9rem 0.85rem;
+      border-radius: 0;
+      border: 1px solid var(--ink);
+      background: var(--white);
+      color: var(--ink);
+      font: 500 13px "DM Mono", monospace;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     input:focus {
       outline: none;
-      border-color: rgba(109, 94, 252, 0.8);
-      box-shadow: 0 0 0 4px rgba(109, 94, 252, 0.12);
+      border-color: var(--blue);
+      box-shadow: 4px 4px 0 var(--orange);
     }
 
     .helper-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin: 0 0 18px;
+      gap: 12px;
+      margin: 0 0 30px;
     }
 
     .helper-button {
-      border: 1px solid rgba(109, 94, 252, 0.2);
-      background: rgba(109, 94, 252, 0.08);
-      color: var(--primary-dark);
-      border-radius: 999px;
-      padding: 0.58rem 0.9rem;
-      font-weight: 700;
+      border: 1px solid var(--ink);
+      background: transparent;
+      color: var(--ink);
+      border-radius: 0;
+      padding: 0.65rem 0.8rem;
+      font: 600 12px "DM Sans", sans-serif;
       cursor: pointer;
-      transition: transform 0.15s ease, background 0.15s ease;
+      transition: transform .2s ease, background-color .2s ease, color .2s ease;
     }
 
     .helper-button:hover {
-      transform: translateY(-1px);
-      background: rgba(109, 94, 252, 0.12);
+      transform: translateY(-2px);
+      background: var(--ink);
+      color: var(--white);
     }
 
     .actions {
       display: flex;
       justify-content: flex-end;
-      margin-top: 22px;
+      margin-top: 28px;
     }
 
     .save-button {
-      border: none;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      padding: 0.9rem 1.3rem;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 700;
+      border: 1px solid transparent;
+      background: var(--blue);
+      color: var(--white);
+      padding: 14px 18px;
+      border-radius: 0;
+      font: 700 13px "DM Sans", sans-serif;
       cursor: pointer;
-      box-shadow: 0 12px 25px rgba(109, 94, 252, 0.28);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      transition: transform .2s ease, background-color .2s ease;
     }
 
     .save-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 28px rgba(109, 94, 252, 0.32);
+      transform: translateY(-2px);
+      background: var(--blue-dark);
     }
 
     .success-banner {
@@ -182,105 +194,113 @@ HTML = """
       align-items: center;
       gap: 10px;
       padding: 0.85rem 1rem;
-      border: 1px solid var(--success-border);
-      border-radius: 12px;
-      background: var(--success-bg);
-      color: var(--success-text);
-      font-weight: 600;
+      border: 1px solid var(--green);
+      border-radius: 0;
+      background: transparent;
+      color: var(--green);
+      font: 500 12px "DM Mono", monospace;
+      margin-bottom: 26px;
     }
 
     .tags-panel {
-      padding: 1.5rem 1.2rem 1.1rem;
+      padding: 80px 0 0;
     }
 
     .section-title {
-      margin: 0 0 16px;
-      font-size: 1.2rem;
-      font-weight: 800;
-      letter-spacing: -0.04em;
+      margin: 0 0 24px;
+      font: 600 clamp(2rem, 4vw, 3.4rem)/.95 "Space Grotesk", sans-serif;
+      letter-spacing: -.065em;
     }
 
     .tag-list {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
+      grid-template-columns: 1fr;
+      gap: 0;
       list-style: none;
       margin: 0;
       padding: 0;
     }
 
     .tag-card {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 16px 14px;
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(248,250,252,0.9));
-      border: 1px solid rgba(148,163,184,0.22);
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr) minmax(0, 1.5fr) minmax(120px, .7fr);
+      align-items: center;
+      gap: 18px;
+      padding: 18px 0;
+      border-radius: 0;
+      background: transparent;
+      border-top: 1px solid var(--line);
     }
 
     .tag-meta {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
       gap: 8px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
+      font-family: "DM Mono", monospace;
     }
 
     .pill {
       display: inline-flex;
       align-items: center;
-      padding: 0.3rem 0.6rem;
-      border-radius: 999px;
-      font-weight: 700;
+      padding: 0.28rem 0.45rem;
+      border-radius: 0;
+      font: 500 10px "DM Mono", monospace;
       letter-spacing: 0.04em;
     }
 
     .pill.content {
-      background: rgba(20,184,166,0.12);
-      color: #0f766e;
+      background: transparent;
+      color: var(--green);
+      border: 1px solid var(--green);
     }
 
     .pill.action {
-      background: rgba(245, 158, 11, 0.12);
-      color: #a16207;
+      background: transparent;
+      color: var(--orange);
+      border: 1px solid var(--orange);
     }
 
     .tag-uid {
-      font-weight: 800;
+      font: 600 16px "Space Grotesk", sans-serif;
       font-size: 1rem;
       word-break: break-all;
     }
 
     .tag-value {
       font-size: 0.95rem;
-      color: var(--text);
-      word-break: break-all;
+      color: var(--ink);
+      word-break: break-word;
+      font: 12px "DM Mono", monospace;
       line-height: 1.5;
     }
 
     .tag-label {
       color: var(--muted);
       font-size: 0.9rem;
-      font-style: italic;
     }
 
     .empty-state {
-      padding: 1rem 0.5rem;
+      padding: 1.2rem 0.5rem;
       text-align: center;
       color: var(--muted);
-      background: rgba(148,163,184,0.05);
-      border-radius: 14px;
-      border: 1px dashed rgba(148,163,184,0.4);
+      background: var(--paper-deep);
+      border-radius: 0;
+      border: 1px dashed var(--line);
+      grid-column: 1 / -1;
     }
 
     @media (max-width: 640px) {
+      .app-shell { width: calc(100% - 32px); }
       .header {
         flex-direction: column;
         align-items: flex-start;
+        justify-content: center;
+        padding: 28px 0;
       }
 
       .actions {
@@ -290,6 +310,26 @@ HTML = """
       .save-button {
         width: 100%;
       }
+
+      .tag-card {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .tag-meta {
+        justify-content: space-between;
+      }
+    }
+
+    button:focus-visible, input:focus-visible {
+      outline: 3px solid var(--orange);
+      outline-offset: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: .01ms !important;
+      }
     }
   </style>
 </head>
@@ -297,10 +337,11 @@ HTML = """
   <div class="app-shell">
     <header class="header">
       <div>
+        <span class="badge">Tag assignment / field guide</span>
         <h1 class="title">TapTune</h1>
         <p class="subtitle">Assign playlists and shortcuts to your NFC tags.</p>
       </div>
-      <span class="badge">Ready to map</span>
+      <span class="badge">Physical input → playback</span>
     </header>
 
     <main class="panel form-panel">
@@ -326,7 +367,7 @@ HTML = """
             <input id="label" name="label" placeholder="e.g. Morning playlist">
           </div>
 
-          <div class="field" style="grid-column: 1 / -1;">
+          <div class="field">
             <label for="value">Spotify URI / Action</label>
             <input id="value" name="value" required placeholder="spotify:playlist:... or action:play_pause">
           </div>
