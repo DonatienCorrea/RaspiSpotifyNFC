@@ -1,0 +1,14 @@
+[Unit]
+Description=RaspiSpotifyNFC service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/RaspiSpotifyNFC
+ExecStart=/usr/bin/python3 -m app.main
+Restart=always
+RestartSec=5
+EnvironmentFile=/home/pi/RaspiSpotifyNFC/.env
+
+[Install]
+WantedBy=multi-user.target
