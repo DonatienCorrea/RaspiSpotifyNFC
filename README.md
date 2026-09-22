@@ -1,6 +1,6 @@
-# RaspiSpotifyNFC
+# TapTune
 
-A Raspberry Pi 5 + RC522 NFC reader project that lets a household tap physical tags to trigger Spotify playback and simple control actions.
+TapTune is a Raspberry Pi + RC522 NFC reader project that lets a household tap physical tags to trigger Spotify playback and simple control actions.
 
 ## v1 goals
 

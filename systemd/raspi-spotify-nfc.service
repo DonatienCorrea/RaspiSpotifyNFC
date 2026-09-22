@@ -1,5 +1,5 @@
 [Unit]
-Description=RaspiSpotifyNFC service
+Description=TapTune service
 After=network.target
 
 [Service]

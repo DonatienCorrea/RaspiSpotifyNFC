@@ -9,10 +9,10 @@ HTML = """
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>RaspiSpotifyNFC</title>
+  <title>TapTune</title>
 </head>
 <body>
-  <h1>RaspiSpotifyNFC</h1>
+  <h1>TapTune</h1>
   <form method="post" action="/assign">
     <label>Tag UID<br><input name="uid" required></label><br>
     <label>Label<br><input name="label"></label><br>
@@ -42,7 +42,7 @@ def create_app() -> Flask:
 
     @app.get("/health")
     def health():
-        return jsonify({"status": "ok", "app": "RaspiSpotifyNFC"})
+        return jsonify({"status": "ok", "app": "TapTune"})
 
     @app.post("/assign")
     def assign_tag():
