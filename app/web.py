@@ -2,14 +2,14 @@ from flask import Flask, jsonify, redirect, render_template_string, request, url
 
 from .config import settings
 from .db import get_tag_by_uid, list_tags, record_event, upsert_tag
-from .spotify_service import dispatch_tag_value
+from .spotify_service import dispatch_tag_value, get_tag_type
 
 HTML = """
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>TapTune</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,38 +39,91 @@ HTML = """
       background: var(--paper);
       color: var(--ink);
       -webkit-font-smoothing: antialiased;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M0 31.5h32M31.5 0v32' stroke='%23c9c5b9' stroke-opacity='.22' stroke-width='1'/%3E%3C/svg%3E");
     }
 
     .app-shell {
       width: min(1160px, calc(100% - 64px));
       margin: 0 auto;
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       gap: 0;
+      min-width: 0;
     }
+
+    .app-shell > *,
+    .header > *,
+    .assignment-heading > *,
+    .form-grid > *,
+    .tag-card > * { min-width: 0; }
 
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      min-height: 82px;
-      padding: 0;
+      min-height: 112px;
+      padding: 20px 0;
       border-bottom: 1px solid var(--line);
     }
 
-    .title {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: clamp(2.8rem, 7vw, 6.5rem);
-      line-height: .9;
-      font-weight: 600;
-      letter-spacing: -0.065em;
-      margin: 0;
+    .skip-link {
+      position: absolute;
+      left: 20px;
+      top: -60px;
+      z-index: 2;
+      padding: 12px 16px;
+      background: var(--ink);
+      color: var(--white);
     }
 
+    .skip-link:focus { top: 20px; }
+    a, button { touch-action: manipulation; }
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 3px solid var(--orange);
+      outline-offset: 4px;
+    }
+    h1, h2, h3 { scroll-margin-top: 28px; }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(1.75rem, 3vw, 2.25rem);
+      line-height: 1;
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      margin: 6px 0 0;
+      overflow-wrap: anywhere;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      flex: 0 0 auto;
+      fill: none;
+      stroke: var(--orange);
+      stroke-width: 2;
+    }
+
+    .logo-mark circle:nth-child(2) { fill: var(--orange); stroke: none; }
+    .brand-tune { color: var(--blue); }
+    .assignment-heading {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, .7fr);
+      align-items: end;
+      gap: 28px;
+      margin-bottom: 34px;
+    }
+
+    .assignment-heading .section-title { margin: 12px 0 0; }
+    .assignment-heading > p { max-width: 310px; margin: 0 0 5px; color: var(--muted); }
+
     .subtitle {
-      margin: 18px 0 0;
+      margin: 8px 0 0;
       color: var(--muted);
-      font-size: 1.1rem;
+      font-size: .9rem;
       max-width: 500px;
     }
 
@@ -137,7 +190,7 @@ HTML = """
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    input:focus {
+    input:focus-visible {
       outline: none;
       border-color: var(--blue);
       box-shadow: 4px 4px 0 var(--orange);
@@ -150,11 +203,21 @@ HTML = """
       margin: 0 0 30px;
     }
 
+    .helper-label, .record-label {
+      color: var(--muted);
+      font: 500 10px "DM Mono", monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .helper-label { align-self: center; margin-right: 4px; }
+
     .helper-button {
       border: 1px solid var(--ink);
       background: transparent;
       color: var(--ink);
       border-radius: 0;
+      min-height: 44px;
       padding: 0.65rem 0.8rem;
       font: 600 12px "DM Sans", sans-serif;
       cursor: pointer;
@@ -177,6 +240,7 @@ HTML = """
       border: 1px solid transparent;
       background: var(--blue);
       color: var(--white);
+      min-height: 48px;
       padding: 14px 18px;
       border-radius: 0;
       font: 700 13px "DM Sans", sans-serif;
@@ -209,7 +273,8 @@ HTML = """
     .section-title {
       margin: 0 0 24px;
       font: 600 clamp(2rem, 4vw, 3.4rem)/.95 "Space Grotesk", sans-serif;
-      letter-spacing: -.065em;
+      letter-spacing: -.04em;
+      overflow-wrap: anywhere;
     }
 
     .tag-list {
@@ -223,7 +288,7 @@ HTML = """
 
     .tag-card {
       display: grid;
-      grid-template-columns: 120px minmax(0, 1fr) minmax(0, 1.5fr) minmax(120px, .7fr);
+      grid-template-columns: 150px minmax(130px, .7fr) minmax(0, 1.5fr) minmax(120px, .7fr);
       align-items: center;
       gap: 18px;
       padding: 18px 0;
@@ -243,6 +308,8 @@ HTML = """
       color: var(--muted);
       font-family: "DM Mono", monospace;
     }
+
+    .tag-meta > span:last-child { overflow-wrap: anywhere; }
 
     .pill {
       display: inline-flex;
@@ -274,7 +341,7 @@ HTML = """
     .tag-value {
       font-size: 0.95rem;
       color: var(--ink);
-      word-break: break-word;
+      overflow-wrap: anywhere;
       font: 12px "DM Mono", monospace;
       line-height: 1.5;
     }
@@ -282,7 +349,10 @@ HTML = """
     .tag-label {
       color: var(--muted);
       font-size: 0.9rem;
+      overflow-wrap: anywhere;
     }
+
+    .record-label { display: block; margin-bottom: 5px; }
 
     .empty-state {
       padding: 1.2rem 0.5rem;
@@ -296,11 +366,12 @@ HTML = """
 
     @media (max-width: 640px) {
       .app-shell { width: calc(100% - 32px); }
+      .assignment-heading { grid-template-columns: 1fr; gap: 14px; }
       .header {
         flex-direction: column;
         align-items: flex-start;
         justify-content: center;
-        padding: 28px 0;
+        padding: 24px 0;
       }
 
       .actions {
@@ -321,35 +392,41 @@ HTML = """
       }
     }
 
-    button:focus-visible, input:focus-visible {
-      outline: 3px solid var(--orange);
-      outline-offset: 4px;
-    }
-
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
       }
     }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#assignment">Skip to tag assignment</a>
   <div class="app-shell">
     <header class="header">
       <div>
         <span class="badge">Tag assignment / field guide</span>
-        <h1 class="title">TapTune</h1>
+        <h1 class="title"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="16" cy="16" r="13"></circle><circle cx="16" cy="16" r="5"></circle><path d="M16 3v7M16 22v7"></path></svg><span>Tap<span class="brand-tune">Tune</span></span></h1>
         <p class="subtitle">Assign playlists and shortcuts to your NFC tags.</p>
       </div>
       <span class="badge">Physical input → playback</span>
     </header>
 
-    <main class="panel form-panel">
+    <main id="assignment" class="panel form-panel">
       {% if saved %}
-        <div class="success-banner" role="status">✓ Tag saved successfully.</div>
+        <div class="success-banner" role="status" aria-live="polite">✓ Tag saved successfully.</div>
       {% endif %}
 
+      <div class="assignment-heading">
+        <div>
+          <span class="badge">01 / Map a physical input</span>
+          <h2 class="section-title">Give a tag a job.</h2>
+        </div>
+        <p>Enter the UID printed by the reader, then point it at a Spotify URI or a playback action.</p>
+      </div>
       <div class="helper-row">
+        <span class="helper-label">Quick fill</span>
         <button type="button" class="helper-button" data-value="spotify:playlist:37i9dQZF1DXcBWIGoYBM5M">Spotify playlist</button>
         <button type="button" class="helper-button" data-value="action:play_pause">Play / pause</button>
         <button type="button" class="helper-button" data-value="action:next_track">Next track</button>
@@ -359,17 +436,17 @@ HTML = """
         <div class="form-grid">
           <div class="field">
             <label for="uid">Tag UID</label>
-            <input id="uid" name="uid" required placeholder="e.g. 04A7B2F1">
+            <input id="uid" name="uid" required autocomplete="off" spellcheck="false" inputmode="text" placeholder="Example: 04A7B2F1…">
           </div>
 
           <div class="field">
             <label for="label">Friendly label</label>
-            <input id="label" name="label" placeholder="e.g. Morning playlist">
+            <input id="label" name="label" autocomplete="off" placeholder="Example: Morning playlist…">
           </div>
 
           <div class="field">
             <label for="value">Spotify URI / Action</label>
-            <input id="value" name="value" required placeholder="spotify:playlist:... or action:play_pause">
+            <input id="value" name="value" required autocomplete="off" spellcheck="false" placeholder="spotify:playlist:… or action:play_pause">
           </div>
         </div>
 
@@ -389,8 +466,8 @@ HTML = """
               <span>{{ tag.uid }}</span>
             </div>
             <div class="tag-uid">{{ tag.uid }}</div>
-            <div class="tag-value">{{ tag.value }}</div>
-            {% if tag.label %}<div class="tag-label">{{ tag.label }}</div>{% endif %}
+            <div><span class="record-label">Target</span><div class="tag-value">{{ tag.value }}</div></div>
+            <div class="tag-label">{% if tag.label %}<span class="record-label">Label</span>{{ tag.label }}{% else %}<span class="record-label">Label</span>Unlabeled{% endif %}</div>
           </li>
         {% else %}
           <li class="empty-state">No tags assigned yet.</li>
@@ -433,14 +510,16 @@ def create_app() -> Flask:
         if not uid or not value:
             return jsonify({"error": "uid and value are required"}), 400
 
-        if value.startswith("spotify:"):
-            tag_type = "content"
-        elif value.startswith("action:"):
-            tag_type = "action"
-        else:
-            tag_type = "content"
+        tag_type = get_tag_type(value)
+        if tag_type is None:
+            return jsonify({
+                "error": (
+                    "Unsupported value. Use a Spotify track, playlist, or album URI, "
+                    "or action:play_pause, action:next, or action:next_track."
+                )
+            }), 400
 
-        tag = upsert_tag(uid=uid, value=value, tag_type=tag_type, label=label)
+        upsert_tag(uid=uid, value=value, tag_type=tag_type, label=label)
         return redirect(url_for("index", saved=1))
 
     @app.post("/dispatch")

@@ -8,6 +8,9 @@ SCHEMA_PATH = BASE_DIR / "data" / "schema.sql"
 
 
 def get_connection() -> sqlite3.Connection:
+    if not SCHEMA_PATH.is_file():
+        raise FileNotFoundError(f"Database schema not found: {SCHEMA_PATH}")
+
     db_dir = Path(settings.DATABASE_PATH).resolve().parent
     db_dir.mkdir(parents=True, exist_ok=True)
 
@@ -15,8 +18,7 @@ def get_connection() -> sqlite3.Connection:
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
 
-    if SCHEMA_PATH.exists():
-        connection.executescript(SCHEMA_PATH.read_text())
+    connection.executescript(SCHEMA_PATH.read_text())
 
     return connection
 

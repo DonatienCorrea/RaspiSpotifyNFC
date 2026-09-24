@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any, Optional
 
 try:
@@ -10,6 +11,10 @@ except ModuleNotFoundError:  # pragma: no cover - exercised when the optional de
     SpotifyOAuth = None
 
 from .config import settings
+
+SPOTIFY_URI_PATTERN = re.compile(r"^spotify:(track|playlist|album):([A-Za-z0-9]+)$")
+SUPPORTED_ACTIONS = frozenset({"action:play_pause", "action:next", "action:next_track"})
+_fake_spotify_client: Optional["FakeSpotifyClient"] = None
 
 
 class FakeSpotifyClient:
@@ -55,9 +60,21 @@ def is_live_spotify_configured() -> bool:
     return bool(settings.SPOTIFY_CLIENT_ID and settings.SPOTIFY_CLIENT_SECRET and settings.SPOTIFY_REFRESH_TOKEN)
 
 
+def get_tag_type(value: str) -> Optional[str]:
+    if SPOTIFY_URI_PATTERN.fullmatch(value):
+        return "content"
+    if value in SUPPORTED_ACTIONS:
+        return "action"
+    return None
+
+
 def build_spotify_client() -> Any:
+    global _fake_spotify_client
+
     if not is_live_spotify_configured():
-        return FakeSpotifyClient()
+        if _fake_spotify_client is None:
+            _fake_spotify_client = FakeSpotifyClient()
+        return _fake_spotify_client
 
     if Spotify is None or SpotifyOAuth is None:
         raise RuntimeError(
@@ -77,12 +94,18 @@ def build_spotify_client() -> Any:
 
 
 def play_content(uri: str, position_ms: int = 0) -> dict:
+    match = SPOTIFY_URI_PATTERN.fullmatch(uri)
+    if not match:
+        return {"status": "unsupported_uri", "uri": uri}
+    if isinstance(position_ms, bool) or not isinstance(position_ms, int) or position_ms < 0:
+        return {"status": "invalid_position", "position_ms": position_ms}
+
     spotify = build_spotify_client()
-    if uri.startswith("spotify:track:"):
+    if match.group(1) == "track":
         return spotify.start_playback(uris=[uri], position_ms=position_ms)
-    if uri.startswith("spotify:playlist:") or uri.startswith("spotify:album:"):
+    if match.group(1) in {"playlist", "album"}:
         return spotify.start_playback(context_uri=uri, position_ms=position_ms)
-    return {"status": "unsupported_uri", "uri": uri}
+    raise AssertionError("Validated Spotify URI had an unsupported resource type")
 
 
 def toggle_playback() -> dict:
@@ -108,6 +131,6 @@ def dispatch_tag_value(value: str) -> dict:
         return play_content(value)
     if value == "action:play_pause":
         return toggle_playback()
-    if value == "action:next":
+    if value in {"action:next", "action:next_track"}:
         return next_track()
     return {"status": "unsupported_action", "value": value}

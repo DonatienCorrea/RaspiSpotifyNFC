@@ -1,15 +1,12 @@
 import argparse
 
 from .db import record_event, upsert_tag
-from .spotify_service import dispatch_tag_value
+from .spotify_service import dispatch_tag_value, get_tag_type
 
 
 def dispatch_simulated_value(uid: str, value: str) -> dict:
-    if value.startswith("spotify:"):
-        tag_type = "content"
-    elif value.startswith("action:"):
-        tag_type = "action"
-    else:
+    tag_type = get_tag_type(value)
+    if tag_type is None:
         raise ValueError(f"Unsupported simulated tag value: {value}")
 
     upsert_tag(uid=uid, value=value, tag_type=tag_type, label=f"simulated-{uid}")

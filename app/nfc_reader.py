@@ -54,7 +54,10 @@ class RC522Reader(ReaderBase):
             return None
 
         uid_hex = "".join(f"{byte:02X}" for byte in uid)
-        payload = uid_hex
+        from .db import get_tag_by_uid
+
+        tag = get_tag_by_uid(uid_hex)
+        payload = tag["value"] if tag else uid_hex
         return NFCEvent(uid=uid_hex, payload=payload, source="nfc")
 
     def write_tag(self, uid: str, payload: str) -> bool:
