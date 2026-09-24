@@ -1,14 +1,16 @@
 [Unit]
 Description=TapTune service
-After=network.target
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 Type=simple
 WorkingDirectory=/home/pi/TapTune
-ExecStart=/usr/bin/python3 -m app.main
+ExecStart=/home/pi/TapTune/.venv/bin/python -m app.main
 Restart=always
 RestartSec=5
 EnvironmentFile=/home/pi/TapTune/.env
+Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target
