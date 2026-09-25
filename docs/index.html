@@ -51,24 +51,25 @@
           <div class="hero-note"><span class="status-dot" aria-hidden="true"></span> Assign and simulate the full playback path before wiring the reader loop.</div>
         </div>
 
-        <div class="hero-diagram" aria-label="Illustration of an NFC tag sending a signal to a Raspberry Pi and Spotify" role="img">
-          <div class="diagram-label label-tag">PHYSICAL INPUT</div>
-          <div class="nfc-tag">
-            <div class="tag-ring"></div>
-            <div class="tag-chip"><span></span><span></span><span></span></div>
-            <small>NFC<br />TAG</small>
+        <figure class="hero-visual">
+          <div class="hero-photo-main">
+            <img src="assets/raspberry-pi-5.jpg" width="1200" height="1500" alt="Raspberry Pi 5 circuit board standing on a wooden surface" fetchpriority="high" />
           </div>
-          <div class="signal-line"><span class="signal-pulse"></span></div>
-          <div class="pi-board">
-            <div class="pi-logo">π</div>
-            <div class="pi-port port-one"></div><div class="pi-port port-two"></div><div class="pi-port port-three"></div>
-            <div class="pi-label">RASPBERRY<br /><strong>PI 5</strong></div>
+          <div class="hero-photo-inset">
+            <img src="assets/rc522-reader.jpg" width="960" height="720" alt="Close-up of an RC522 RFID reader module" />
+            <span>Physical input</span>
           </div>
-          <div class="signal-line signal-line-right"><span class="signal-pulse"></span></div>
-          <div class="spotify-disc"><span class="spotify-mark" aria-hidden="true">≋</span></div>
-          <div class="diagram-label label-output">PLAYBACK</div>
-          <div class="diagram-caption">tap a tag<br /><strong>→ music starts</strong></div>
-        </div>
+          <svg class="hero-signal" viewBox="0 0 190 92" aria-hidden="true" focusable="false">
+            <path d="M6 73C48 73 54 19 98 19s48 54 86 54" />
+            <circle cx="6" cy="73" r="5" />
+            <circle cx="98" cy="19" r="5" />
+            <circle cx="184" cy="73" r="5" />
+          </svg>
+          <figcaption>
+            <span>Hardware stack / Raspberry Pi 5 + RC522</span>
+            <small>Photos: <a href="https://commons.wikimedia.org/wiki/File:Raspberry_Pi_5_(vertical).jpg">SimonWaldherr</a>, CC BY 4.0 · <a href="https://commons.wikimedia.org/wiki/File:RFID-RC522_photo.jpg">Giacomo Alessandroni</a>, CC BY-SA 4.0</small>
+          </figcaption>
+        </figure>
       </section>
 
       <section class="manifesto" id="why">
@@ -124,16 +125,10 @@
             <h2>Small pieces.<br /><span>Clear boundaries.</span></h2>
             <p>Each concern has one home, so the project stays friendly to change.</p>
           </div>
-          <div class="architecture-map">
-            <div class="map-node node-input"><span class="node-icon">⌁</span><strong>NFC reader</strong><small>RC522 · SPI</small></div>
-            <div class="map-connector connector-a" aria-hidden="true"></div>
-            <div class="map-node node-app"><span class="node-icon">⌘</span><strong>Python service</strong><small>dispatch + web UI</small></div>
-            <div class="map-connector connector-b" aria-hidden="true"></div>
-            <div class="map-node node-output"><span class="node-icon">▶</span><strong>Spotify</strong><small>Spotipy · Connect</small></div>
-            <div class="map-node node-data"><span class="node-icon">⊙</span><strong>SQLite</strong><small>tags + resume state</small></div>
-            <div class="map-connector connector-c" aria-hidden="true"></div>
-            <p class="map-caption">The web UI and simulator enter the same dispatch path as a real tap.</p>
-          </div>
+          <figure class="architecture-figure">
+            <img src="assets/signal-path.svg" width="960" height="620" alt="Signal path from an NFC tag through the RC522 reader and Python service to Spotify playback, with SQLite storing assignments" loading="lazy" />
+            <figcaption>The web UI and simulator enter the same dispatch path as a real tap.</figcaption>
+          </figure>
         </div>
         <div class="shell file-strip" aria-label="Project modules">
           <span>app/config.py</span><span>app/nfc_reader.py</span><span>app/spotify_service.py</span><span>app/db.py</span><span>app/web.py</span>
