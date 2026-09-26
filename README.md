@@ -8,7 +8,7 @@ TapTune is a Raspberry Pi + RC522 NFC reader project for assigning physical tags
 - a command-line simulator for testing the dispatch path without hardware; and
 - a `systemd` unit for running the web service on a Pi.
 
-> **Important current boundary:** `app.main` starts the web UI and `/health`; it does not yet start an NFC polling loop. `app.nfc_reader.RC522Reader` can read a UID when the Pi dependency is installed, but physical scans are not connected to dispatch in this scaffold. NFC tag writing is also not implemented. Use the simulator to verify playback dispatch today, and use the UI to assign the UID read from a tag.
+> **Current boundary:** `app.main` starts the web UI and `/health`; it does not yet start an NFC polling loop. `app.nfc_reader.RC522Reader` can read a UID when the Pi dependency is installed, but physical scans are not connected to dispatch in this scaffold. NFC tag writing is also not implemented. Use the simulator to verify playback dispatch today, and use the UI to assign the UID read from a tag.
 
 ## Signal path
 
@@ -20,7 +20,7 @@ The app listens on `APP_HOST:APP_PORT` (defaults to `0.0.0.0:5000`). The UI is a
 
 ## Prerequisites
 
-### macOS/local testing
+### macOS or local development
 
 - macOS with Python 3.10+ and `python3`;
 - network access to install the packages in `requirements.txt`; and
@@ -29,12 +29,30 @@ The app listens on `APP_HOST:APP_PORT` (defaults to `0.0.0.0:5000`). The UI is a
 ### Raspberry Pi
 
 - Raspberry Pi OS Lite (or another Raspberry Pi OS installation) with SSH access;
-- Raspberry Pi 5 and an RC522 connected over SPI;
+- a Raspberry Pi with an RC522 connected over SPI;
 - Python 3.10+;
 - a Spotify Premium account and a Spotify Developer app for live playback; and
 - a tag UID. Read the UID with the RC522 tooling or another NFC reader; this repository does not write payloads to tags.
 
 The current RC522 code expects the `MFRC522` Python package and `spidev`; install those from `requirements-pi.txt` in addition to the base requirements.
+
+## Quick start: local fake mode
+
+Fake mode is the recommended first run. It exercises the database, UI, dispatch code, and simulator without hardware or Spotify credentials.
+
+```bash
+git clone <repository-url> TapTune
+cd TapTune
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+cp .env.example .env
+python -m unittest discover -s tests -v
+python -m app.main
+```
+
+Open `http://127.0.0.1:5000/` in a browser. The copied `.env` deliberately leaves the Spotify variables empty, so the app uses its in-memory fake Spotify client. Stop the server with `Ctrl-C`.
 
 ## Spotify setup
 
@@ -48,19 +66,22 @@ Live mode is enabled only when `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, and
 
 Spotify playback also requires an available Spotify Connect device. A valid token alone does not guarantee that `start_playback` succeeds.
 
-## Local macOS fake-mode test
+## Testing
 
-Run these commands from the repository root:
+### Automated test suite
+
+Run the suite from the repository root after activating the virtual environment:
 
 ```bash
-python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt
-cp .env.example .env
-python -m app.main
+python -m unittest discover -s tests -v
 ```
 
-The example file leaves Spotify credentials blank, so this is fake mode. In a second Terminal window:
+The suite uses a temporary SQLite database and the fake Spotify client. It does not require `.env`, Spotify credentials, an RC522, SPI, or a running server. It covers configuration validation, tag assignment, dispatch, simulator validation, and the RC522 UID lookup behavior.
+
+### Manual fake-mode dispatch check
+
+With `python -m app.main` running in one terminal, use a second terminal to check the HTTP service and dispatch paths:
 
 ```bash
 curl http://127.0.0.1:5000/health
@@ -69,7 +90,9 @@ python -m app.simulate --uid 02AABBCC --payload 'action:play_pause'
 python -m app.simulate --uid 03AABBCC --payload 'action:next'
 ```
 
-The simulator upserts each mapping, records an event, dispatches it, and prints a result containing `"mode": "fake"`. Stop the server with `Ctrl-C`. The default database is `data/raspi_spotify_nfc.db`; it is ignored by Git.
+The simulator upserts each mapping, records an event, dispatches it, and prints a result containing `"mode": "fake"`. The default database is `data/raspi_spotify_nfc.db`; it is ignored by Git.
+
+> The simulator runs as its own command and does not send a request to the Flask server. The health request verifies the server; the simulator verifies the mapping and dispatch path. Both should succeed before configuring live Spotify or installing the service.
 
 ## First tag assignment
 
@@ -99,12 +122,13 @@ From an SSH session on the Pi:
 
 ```bash
 sudo apt update
-sudo apt install -y python3-venv git
+sudo apt install -y git python3-venv sqlite3
 cd /home/pi
 git clone <repository-url> TapTune
 cd TapTune
 python3 -m venv .venv
 source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m pip install -r requirements-pi.txt
 cp .env.example .env
@@ -113,10 +137,11 @@ chmod 600 .env
 
 Edit `.env` with `nano .env`. Keep `DATABASE_PATH=./data/raspi_spotify_nfc.db` unless you deliberately want another location. Enable SPI with `sudo raspi-config` → **Interface Options** → **SPI**, then reboot if Raspberry Pi OS requests it. Connect the RC522 according to the board's pin labels and Pi documentation; do not power a 3.3 V RC522 from 5 V.
 
-Before installing the service, run the same health and fake-mode checks from the Pi:
+Before installing the service, prove the software works on the Pi in fake mode:
 
 ```bash
 source .venv/bin/activate
+python -m unittest discover -s tests -v
 python -m app.main
 ```
 
@@ -131,7 +156,8 @@ curl http://<pi-ip>:5000/health
 The checked-in unit assumes the checkout is `/home/pi/TapTune`, the virtual environment is `.venv`, and `.env` exists there. Install it from the repository root:
 
 ```bash
-sudo cp systemd/raspi-spotify-nfc.service /etc/systemd/system/raspi-spotify-nfc.service
+sudo install -m 644 systemd/raspi-spotify-nfc.service \
+  /etc/systemd/system/raspi-spotify-nfc.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now raspi-spotify-nfc.service
 ```
@@ -198,9 +224,12 @@ sudo systemctl stop raspi-spotify-nfc.service
 git fetch --prune
 git pull --ff-only
 source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m pip install -r requirements-pi.txt
-sudo cp systemd/raspi-spotify-nfc.service /etc/systemd/system/raspi-spotify-nfc.service
+python -m unittest discover -s tests -v
+sudo install -m 644 systemd/raspi-spotify-nfc.service \
+  /etc/systemd/system/raspi-spotify-nfc.service
 sudo systemctl daemon-reload
 sudo systemctl start raspi-spotify-nfc.service
 sudo systemctl status raspi-spotify-nfc.service --no-pager
